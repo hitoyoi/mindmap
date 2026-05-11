@@ -46,8 +46,6 @@
         button:hover { background: #f8fafc; border-color: var(--primary); }
         .btn-primary { background: var(--primary); color: white; border: none; }
         .btn-primary:hover { background: #1d4ed8; }
-        .btn-action { color:#059669; border-color:#a7f3d0; background:#ecfdf5; }
-        .btn-action:hover { background:#d1fae5; }
 
         .palette { display: flex; gap: 6px; flex-wrap: wrap; width: 100%; }
         .color-dot { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: 0.2s; }
@@ -65,16 +63,11 @@
         #canvas-wrapper:active { cursor: grabbing; }
         
         .link { fill: none; stroke: #cbd5e1; stroke-width: 3px; }
-        .node rect { cursor: pointer; transition: filter 0.3s; }
+        .node rect { cursor: pointer; transition: rx 0.2s, filter 0.3s; }
         .node text { pointer-events: none; user-select: none; font-family: 'Inter', sans-serif; transition: font-family 0.3s; }
         
         .selection-box { fill: rgba(37, 99, 235, 0.15); stroke: var(--primary); stroke-dasharray: 4px; stroke-width: 1px; pointer-events: none; }
         .floating-input { position: absolute; border: 3px solid var(--primary); border-radius: 8px; text-align: center; outline: none; z-index: 9999; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-
-        /* 快速新增子節點按鈕 (Hover UI) */
-        .quick-add-btn { fill: #2563eb; cursor: pointer; transition: 0.2s; }
-        .quick-add-btn:hover { fill: #1d4ed8; }
-        .quick-add-text { fill: white; font-size: 14px; font-weight: bold; pointer-events: none; }
 
         .html-memo { position: absolute; background: #fef08a; border-radius: 8px; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); pointer-events: auto; display: flex; flex-direction: column; border-top: 6px solid #eab308; min-width: 150px; min-height: 100px; resize: both; overflow: auto; }
         .html-memo-drag { height: 16px; cursor: move; margin-bottom: 8px; opacity: 0.5; background: repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px); }
@@ -91,6 +84,24 @@
     </style>
 </head>
 <body>
+
+<div id="shortcuts-modal" class="panel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; flex-direction: column; width: 360px; padding: 20px; z-index: 2000; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+    <h3 style="margin:0 0 15px 0; color:#1e293b; text-align:center;">⌨️ 快捷鍵一覽</h3>
+    <div style="display:flex; flex-direction:column; gap:4px; width:100%;">
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>新增子節點</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Enter</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>新增同層節點</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Tab</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>新增中心主題</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Shift + Enter</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>展開 / 折疊</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Space (空白鍵)</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>複製節點</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Cmd/Ctrl + C</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>貼上節點</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Cmd/Ctrl + V</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>快速拷貝 (Duplicate)</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Cmd/Ctrl + D</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>復原 (Undo)</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Cmd/Ctrl + Z</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>圈選多個節點</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Cmd/Ctrl + 拖曳</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0; border-bottom: 1px solid #f1f5f9;"><span>刪除節點</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Del / Back</span></div>
+        <div style="display: flex; justify-content: space-between; font-size: 13px; padding: 6px 0;"><span>取消選取</span> <span style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px; font-weight: bold; color:#0f172a;">Esc</span></div>
+    </div>
+    <button onclick="toggleShortcuts()" class="btn-primary" style="margin-top:15px; width:100%;">我知道了</button>
+</div>
 
 <svg width="0" height="0" style="position:absolute; z-index:-1;">
     <defs>
@@ -125,14 +136,20 @@
 
 <div id="ui-layer">
     <div id="top-bar" class="panel">
-        <button onclick="saveData()">💾 歷史存檔</button>
-        <button onclick="toggleHistory()">📜 紀錄</button>
+        <button onclick="saveData()">💾 本地存檔</button>
+        <button onclick="toggleHistory()">📜 歷史</button>
         <button onclick="undo()">↩️ 復原</button>
         
         <div style="width:1px; height:20px; background:#e2e8f0; margin:0 5px;"></div>
         
-        <button onclick="exportImage()" class="btn-action">📸 匯出圖片 (PNG+SVG)</button>
-        <button onclick="exportJSON()" class="btn-action">📤 匯出資料檔</button>
+        <select id="exportSelect" onchange="handleExport(this.value)" style="color:#059669; font-weight:bold;">
+            <option value="">📸 匯出...</option>
+            <option value="png">匯出為 PNG (去背)</option>
+            <option value="jpg">匯出為 JPG (帶背景)</option>
+            <option value="svg">匯出為 SVG (向量)</option>
+            <option value="json">匯出資料檔 (.json)</option>
+            <option value="md">匯出為文字 (Markdown綱要)</option>
+        </select>
         <button onclick="document.getElementById('import-file').click()" style="color:#059669;">📥 匯入</button>
         <input type="file" id="import-file" style="display:none;" accept=".json" onchange="importJSON(event)">
 
@@ -140,7 +157,7 @@
         <input type="text" id="searchInput" placeholder="🔍 搜尋節點..." onkeyup="searchNodes(this.value)">
         <div style="width:1px; height:20px; background:#e2e8f0; margin:0 5px;"></div>
 
-        <button onclick="autoArrange()" class="btn-primary">✨ 重新排列 (防撞)</button>
+        <button onclick="autoArrange()" class="btn-primary">✨ 重新排列</button>
         <button onclick="applyGenerativeDesign()" style="color:#7e22ce; background:#f3e8ff;">🎨 隨機配色</button>
         <button onclick="fitToScreen()" style="color:#0284c7;">🔍 適應畫面</button>
 
@@ -165,7 +182,11 @@
             <option value="pixel">像素風</option>
             <option value="3d">立體積木</option>
             <option value="blueprint">工程藍圖</option>
+            <option value="holographic">漸層流光</option>
+            <option value="parchment">羊皮紙卷</option>
         </select>
+
+        <button onclick="toggleShortcuts()" style="margin-left:5px; color:#475569;">⌨️ 快捷鍵</button>
     </div>
 
     <div id="history-panel" class="panel"></div>
@@ -201,8 +222,8 @@
                         <button id="boldBtn" onclick="toggleBold()" style="width:36px; padding:0; font-weight:900;">B</button>
                     </div>
                     <select id="shapeSelect" onchange="updateNodes('shape', this.value)" style="width:100%;">
-                        <option value="round">圓角矩形</option>
-                        <option value="pill">膠囊 (兩側圓弧)</option>
+                        <option value="round">圓角 (預設)</option>
+                        <option value="pill">膠囊 (兩側半圓)</option>
                         <option value="square">直角 (方塊)</option>
                     </select>
                 </div>
@@ -275,11 +296,8 @@
     let currentCanvasBg = '#f1f5f9';
     let searchQuery = ""; 
 
-    // 背景無感存檔
-    function autoSaveLocal() {
-        localStorage.setItem("mindmap_autosave", JSON.stringify({mapData, memos}));
-    }
-    // 初始載入自動存檔
+    function autoSaveLocal() { localStorage.setItem("mindmap_autosave", JSON.stringify({mapData, memos})); }
+    
     window.onload = () => {
         const saved = localStorage.getItem("mindmap_autosave");
         if(saved) {
@@ -291,7 +309,6 @@
         render(); renderMemos(); updateUI();
     };
 
-    // 面板拖曳功能
     const sidePanel = document.getElementById("side-panel");
     const sideHeader = document.getElementById("side-panel-header");
     let isDraggingPanel = false, pStartX, pStartY, mStartX, mStartY;
@@ -304,6 +321,12 @@
     window.addEventListener('mouseup', () => isDraggingPanel = false);
 
     window.toggleZen = () => document.body.classList.toggle('zen-mode');
+    
+    // 快捷鍵選單
+    window.toggleShortcuts = () => {
+        const modal = document.getElementById("shortcuts-modal");
+        modal.style.display = modal.style.display === "flex" ? "none" : "flex";
+    };
 
     function traverse(nodes, callback) {
         for (let i = 0; i < nodes.length; i++) {
@@ -313,11 +336,10 @@
         return false;
     }
 
-    // 復原系統
     function pushUndo() { 
         undoStack.push(JSON.stringify({mapData, memos})); 
         if(undoStack.length > 50) undoStack.shift(); 
-        autoSaveLocal(); // 每次動作都自動存檔
+        autoSaveLocal(); 
     }
     window.undo = () => {
         if(undoStack.length > 0) {
@@ -347,7 +369,6 @@
     svg.call(zoomBehavior).on("dblclick.zoom", null).call(zoomBehavior.transform, currentZoom);
     svg.on("contextmenu", (e) => { e.preventDefault(); addMemo(e); });
 
-    // 圈選功能
     let isSelecting = false, startP = [0, 0], initialSelection = new Set();
     svg.on("mousedown", (e) => {
         if ((e.ctrlKey || e.metaKey) && e.target.tagName === 'svg') {
@@ -370,7 +391,6 @@
     });
     window.addEventListener("mouseup", () => { if (isSelecting) { isSelecting = false; selectionBox.style("display", "none"); updateUI(); } });
 
-    // 佈局計算：精確計算寬度防重疊
     const tree = d3.tree().nodeSize([85, 260]);
     let allD3Nodes = [], allD3Links = [];
 
@@ -385,7 +405,7 @@
     function applyDynamicSpacing(root) {
         root.eachBefore(d => {
             if(d.parent) {
-                const gap = 80; // 節點間的水平安全距離
+                const gap = 80; 
                 d.y = d.parent.y + (d.parent.w / 2) + gap + (d.w / 2);
             } else { d.y = 0; }
         });
@@ -433,7 +453,6 @@
         });
     }
 
-    // 完美連線：從邊緣出發
     function generateLinkPath(d) {
         const s = allD3Nodes.find(n => n.data.id === (d.source.data ? d.source.data.id : d.source.id));
         const t = allD3Nodes.find(n => n.data.id === (d.target.data ? d.target.data.id : d.target.id));
@@ -455,24 +474,8 @@
     }
 
     function updatePositionsSync() {
-        mapData.forEach(rootData => {
-            const tempRoot = d3.hierarchy(rootData, d => d._collapsed ? null : d.children);
-            const mapping = new Map(allD3Nodes.map(n => [n.data.id, n]));
-            tempRoot.descendants().forEach(d => {
-                const aD = mapping.get(d.data.id);
-                if(aD) {
-                    aD.vX = aD.y + (aD.parent ? aD.parent.cX : 0) + aD.data.offsetX;
-                    aD.vY = aD.x + (aD.parent ? aD.parent.cY : 0) + aD.data.offsetY;
-                    aD.cX = (aD.parent ? aD.parent.cX : 0) + aD.data.offsetX;
-                    aD.cY = (aD.parent ? aD.parent.cY : 0) + aD.data.offsetY;
-                }
-            });
-        });
         nodeGroup.selectAll(".node").attr("transform", d => `translate(${d.vX},${d.vY})`);
         linkGroup.selectAll(".link").attr("d", d => generateLinkPath(d));
-        
-        // 更新 hover UI 位置
-        nodeGroup.selectAll(".quick-add-group").attr("transform", d => `translate(${(d.vX >= (d.parent?d.parent.vX:d.vX)) ? d.w/2 + 15 : -d.w/2 - 15}, 0)`);
     }
 
     window.searchNodes = (val) => { searchQuery = val.trim().toLowerCase(); renderSelection(); };
@@ -503,8 +506,10 @@
         if(isPixel) filterUrl = "url(#pixel-shadow)";
         if(is3D) filterUrl = "url(#hard-shadow)";
 
-        linkGroup.selectAll(".link").remove();
-        linkGroup.selectAll(".link").data(allD3Links).enter().append("path").attr("class", "link")
+        // ★ 核心修復：使用 data binding，移除了 remove() 避免線條閃爍或消失
+        const links = linkGroup.selectAll(".link").data(allD3Links, d => d.target.data.id);
+        links.exit().remove();
+        links.enter().append("path").attr("class", "link").merge(links)
             .attr("d", d => generateLinkPath(d))
             .style("filter", filterUrl)
             .style("stroke", d => {
@@ -532,18 +537,6 @@
         nEnter.append("text").attr("class", "node-text").attr("text-anchor", "middle");
         nEnter.append("circle").attr("class", "collapsed-indicator").attr("r", 6).style("display", "none");
         nEnter.append("text").attr("class", "collapsed-text").text("+").attr("text-anchor", "middle").attr("dy", 3).style("display", "none");
-
-        // Hover 快速新增按鈕 (UI)
-        const hoverUI = nEnter.append("g").attr("class", "quick-add-group").style("display", "none");
-        hoverUI.append("circle").attr("class", "quick-add-btn").attr("r", 10)
-               .on("click", (e, d) => {
-                   e.stopPropagation(); pushUndo();
-                   let newNode = { id: "n"+Math.random(), name: "新節點", color: d.data.color, textColor: d.data.textColor, fontSize: "14", fontWeight: "normal", shape: d.data.shape, offsetX: 0, offsetY: 0 };
-                   if(!d.data.children) d.data.children = [];
-                   d.data._collapsed = false; d.data.children.push(newNode);
-                   selectedNodes.clear(); selectedNodes.add(newNode.id); render(); updateUI();
-               });
-        hoverUI.append("text").attr("class", "quick-add-text").text("+").attr("text-anchor", "middle").attr("dy", 5);
 
         const m = nEnter.merge(nodes);
         m.attr("transform", d => `translate(${d.vX},${d.vY})`);
@@ -608,14 +601,6 @@
                 if (selectedNodes.has(d.data.id)) return "4px";
                 return ((currentStyle!=='normal'&&currentStyle!=='handdrawn'&&currentStyle!=='glass') ? (currentStyle==='pixel'||currentStyle==='3d'?"4px":"2px") : "0px");
             }); 
-            
-        // 顯示快速新增按鈕給唯一選取的節點
-        nodeGroup.selectAll(".quick-add-group")
-            .style("display", d => (selectedNodes.size === 1 && selectedNodes.has(d.data.id)) ? "block" : "none")
-            .attr("transform", d => {
-                const isRight = d.vX >= (d.parent ? d.parent.vX : d.vX);
-                return `translate(${isRight ? d.w/2 + 15 : -d.w/2 - 15}, 0)`;
-            });
     }
 
     function dragEnd(e, d) {
@@ -646,7 +631,6 @@
         return null; 
     }
 
-    // HTML 文字編輯
     function editNode(d) {
         const overlay = document.getElementById("html-overlay");
         const input = document.createElement("input");
@@ -678,55 +662,77 @@
         input.onblur = done; input.onkeydown = e => { e.stopPropagation(); if(e.key === 'Enter') { e.preventDefault(); done(); } };
     }
 
-    // 匯出功能 (PNG/SVG/JSON)
-    window.exportImage = () => {
-        try {
-            const svgNode = document.getElementById("mindmap-svg");
-            const clone = svgNode.cloneNode(true);
-            const bbox = gAll.node().getBBox();
-            const padding = 60;
-            
-            clone.setAttribute("width", bbox.width + padding*2);
-            clone.setAttribute("height", bbox.height + padding*2);
-            const gClone = clone.querySelector("g");
-            gClone.setAttribute("transform", `translate(${-bbox.x + padding}, ${-bbox.y + padding})`);
-            
-            // 加入實心背景確保 JPG/PNG 顏色正確
-            const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            bgRect.setAttribute("width", "100%"); bgRect.setAttribute("height", "100%");
-            bgRect.setAttribute("fill", currentCanvasBg || "#f1f5f9");
-            clone.insertBefore(bgRect, clone.firstChild);
+    // 匯出功能 
+    window.handleExport = (format) => {
+        if(!format) return;
+        document.getElementById('exportSelect').value = ""; 
+        
+        if (format === 'json') {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({mapData, memos}));
+            const a = document.createElement('a'); a.href = dataStr; a.download = `MindMap_${Date.now()}.json`; a.click();
+            return;
+        }
 
-            const serializer = new XMLSerializer();
-            let source = serializer.serializeToString(clone);
-            if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){ source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"'); }
-            source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+        // 新增功能：匯出為文字(Markdown)
+        if (format === 'md') {
+            const generateMarkdown = (nodes, depth = 0) => {
+                let md = "";
+                nodes.forEach(n => {
+                    md += "  ".repeat(depth) + "- " + n.name + "\n";
+                    if(n.children && n.children.length > 0) md += generateMarkdown(n.children, depth + 1);
+                });
+                return md;
+            };
+            const mdStr = generateMarkdown(mapData);
+            const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(mdStr);
+            const a = document.createElement('a'); a.href = dataStr; a.download = `MindMap_${Date.now()}.md`; a.click();
+            return;
+        }
 
-            // 匯出 SVG
+        const svgNode = document.getElementById("mindmap-svg");
+        const clone = svgNode.cloneNode(true);
+        const bbox = gAll.node().getBBox();
+        const padding = 60;
+        
+        clone.setAttribute("width", bbox.width + padding*2);
+        clone.setAttribute("height", bbox.height + padding*2);
+        const gClone = clone.querySelector("g");
+        gClone.setAttribute("transform", `translate(${-bbox.x + padding}, ${-bbox.y + padding})`);
+        
+        const bgRect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+        bgRect.setAttribute("width", "100%"); bgRect.setAttribute("height", "100%");
+        bgRect.setAttribute("fill", currentCanvasBg || "#f1f5f9");
+        clone.insertBefore(bgRect, clone.firstChild);
+
+        const serializer = new XMLSerializer();
+        let source = serializer.serializeToString(clone);
+        if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){ source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"'); }
+        source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+
+        if (format === 'svg') {
             const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(source);
             const a = document.createElement("a"); a.href = url; a.download = `MindMap_${Date.now()}.svg`; a.click();
-            
-            // 同時匯出 PNG
+        } else {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement("canvas");
                 canvas.width = (bbox.width + padding*2) * 2; canvas.height = (bbox.height + padding*2) * 2;
                 const ctx = canvas.getContext("2d"); ctx.scale(2, 2);
                 ctx.drawImage(img, 0, 0);
-                const pngUrl = canvas.toDataURL("image/png", 1.0);
-                const a2 = document.createElement("a"); a2.href = pngUrl; a2.download = `MindMap_${Date.now()}.png`; a2.click();
+                
+                if(format === 'png') {
+                    // PNG 去背: 清除背景顏色
+                    ctx.clearRect(-padding + bbox.x, -padding + bbox.y, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                }
+                
+                const pngUrl = canvas.toDataURL(`image/${format==='jpg'?'jpeg':'png'}`, 1.0);
+                const a2 = document.createElement("a"); a2.href = pngUrl; a2.download = `MindMap_${Date.now()}.${format}`; a2.click();
             };
             img.src = "data:image/svg+xml;base64," + btoa(unescape(encodeURIComponent(source)));
-        } catch (e) {
-            alert("圖片匯出失敗，請重試！");
-            console.error(e);
         }
     };
 
-    window.exportJSON = () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({mapData, memos}));
-        const dlAnchorElem = document.createElement('a'); dlAnchorElem.setAttribute("href", dataStr); dlAnchorElem.setAttribute("download", `mindmap_${Date.now()}.json`); dlAnchorElem.click();
-    };
     window.importJSON = (event) => {
         const file = event.target.files[0]; if (!file) return;
         const reader = new FileReader();
@@ -741,7 +747,6 @@
         event.target.value = ""; 
     };
 
-    // 風格、連線與背景
     window.setLinkStyle = (type) => { pushUndo(); currentLinkType = type; render(); };
     window.setMapStyle = (style) => {
         pushUndo(); currentStyle = style;
@@ -779,7 +784,7 @@
         remapId(clone); clone.offsetX = 0; clone.offsetY = 0; return clone;
     }
 
-    // --- 鍵盤操作 ---
+    // 鍵盤操作
     document.addEventListener("keydown", (e) => {
         if(e.key === "F11") { e.preventDefault(); toggleZen(); return; }
         if(document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
@@ -885,7 +890,7 @@
     window.toggleBold = () => { pushUndo(); const btn = document.getElementById("boldBtn"); const isBold = !btn.classList.contains("active"); if(isBold) btn.classList.add("active"); else btn.classList.remove("active"); const a = n => { if(selectedNodes.has(n.id)) n.fontWeight = isBold ? "bold" : "normal"; if(n.children) n.children.forEach(a); }; mapData.forEach(a); render(); };
     window.updateNodes = (t, v) => { pushUndo(); const a = n => { if(selectedNodes.has(n.id)){ if(t==='bg') n.color = v; if(t==='text') n.textColor = v; if(t==='size') n.fontSize = v; if(t==='shape') n.shape = v; } if(n.children) n.children.forEach(a); }; mapData.forEach(a); render(); };
     
-    // ★修復：動態智慧排列 (多中心節點垂直分散防撞)
+    // ★修復：動態智慧排列 (多中心節點垂直分散防撞，並且不自動縮放)
     window.autoArrange = () => { 
         pushUndo(); 
         let currentY = 0;
@@ -893,7 +898,6 @@
             const reset = n => { n.offsetX = 0; n.offsetY = 0; if(n.children) n.children.forEach(reset); };
             reset(r);
             
-            // 預先計算這棵樹的實際高低範圍
             let tempRoot = d3.hierarchy(r, d => d._collapsed ? null : d.children);
             tempRoot.each(d => computeNodeSize(d));
             tree(tempRoot);
@@ -903,10 +907,10 @@
             tempRoot.each(d => { if (d.x < minX) minX = d.x; if (d.x > maxX) maxX = d.x; });
             
             r.offsetX = 0; 
-            r.offsetY = currentY - minX; // 對齊上方邊界
-            currentY += (maxX - minX) + 120; // 往下推移這棵樹的高度 + 緩衝區
+            r.offsetY = currentY - minX; 
+            currentY += (maxX - minX) + 120; 
         });
-        render(); setTimeout(fitToScreen, 100); 
+        render(); 
     };
     
     window.recenter = () => svg.transition().duration(500).call(zoomBehavior.transform, d3.zoomIdentity.translate(window.innerWidth/2, window.innerHeight/2));
@@ -959,7 +963,6 @@
     }
     function updateHtmlElements() { memos.forEach(m => { const el = document.getElementById(m.id); if(el){ el.style.left = (m.x*currentZoom.k+currentZoom.x)+"px"; el.style.top = (m.y*currentZoom.k+currentZoom.y)+"px"; el.style.transform = `scale(${currentZoom.k})`; el.style.transformOrigin = "top left"; } }); }
 
-    // 儲存與歷史
     window.saveData = () => {
         const hist = JSON.parse(localStorage.getItem("mindmap_pro") || "[]");
         const centerName = mapData.length > 0 ? (mapData[0].name || "無題") : "無題";
@@ -971,6 +974,7 @@
     function updateHistoryPanel() { const p = document.getElementById("history-panel"), hist = JSON.parse(localStorage.getItem("mindmap_pro") || "[]"); p.innerHTML = hist.length ? hist.map((h, i) => `<button class="history-item" onclick="restore(${i})">🕒 ${h.displayName}</button>`).join("") : "<div style='padding:10px; font-size:12px; color:#999;'>無紀錄</div>"; }
     window.restore = i => { const hist = JSON.parse(localStorage.getItem("mindmap_pro")); mapData = hist[i].mapData; memos = hist[i].memos || []; selectedNodes.clear(); if(mapData.length) selectedNodes.add(mapData[0].id); render(); renderMemos(); document.getElementById("history-panel").style.display = "none"; };
 
+    setCanvasBg('#f1f5f9'); setPattern('grid'); render(); renderMemos(); updateUI();
 </script>
 </body>
 </html>
